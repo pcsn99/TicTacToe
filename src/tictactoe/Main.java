@@ -1,24 +1,23 @@
 package tictactoe;
 
 import java.awt.BorderLayout;
+import java.awt.Button;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+//TicTacToe is FUN !
 
-//tictactoe is fun!
-
-public class Main extends JFrame {
-    private JButton[][] buttons;
+public class Main extends Frame {
+    private Button[][] buttons;
     private char currentPlayer;
     private char[][] board;
-    private JButton newGameButton;
+    private Button newGameButton;
 
     public Main() {
         currentPlayer = 'X';
@@ -40,18 +39,16 @@ public class Main extends JFrame {
     private void initializeGUI() {
         setTitle("Tic Tac Toe");
         setSize(400, 450); // Adjusted size to accommodate the New Game button
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         // Panel for the game grid
-        JPanel gridPanel = new JPanel();
+        Panel gridPanel = new Panel();
         gridPanel.setLayout(new GridLayout(3, 3));
-        buttons = new JButton[3][3];
+        buttons = new Button[3][3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                buttons[i][j] = new JButton("");
+                buttons[i][j] = new Button("");
                 buttons[i][j].setFont(new Font("Arial", Font.PLAIN, 60));
-                buttons[i][j].setFocusPainted(false);
                 buttons[i][j].addActionListener(new ButtonClickListener(i, j));
                 gridPanel.add(buttons[i][j]);
             }
@@ -59,7 +56,7 @@ public class Main extends JFrame {
         add(gridPanel, BorderLayout.CENTER);
 
         // New Game button
-        newGameButton = new JButton("New Game");
+        newGameButton = new Button("New Game");
         newGameButton.setFont(new Font("Arial", Font.PLAIN, 20));
         newGameButton.addActionListener(new ActionListener() {
             @Override
@@ -68,6 +65,12 @@ public class Main extends JFrame {
             }
         });
         add(newGameButton, BorderLayout.SOUTH);
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent we) {
+                System.exit(0);
+            }
+        });
 
         setVisible(true);
     }
@@ -86,14 +89,14 @@ public class Main extends JFrame {
         public void actionPerformed(ActionEvent e) {
             if (board[row][col] == '-') {
                 board[row][col] = currentPlayer;
-                buttons[row][col].setText(String.valueOf(currentPlayer));
+                buttons[row][col].setLabel(String.valueOf(currentPlayer));
                 buttons[row][col].setEnabled(false);
 
                 if (checkWin()) {
-                    JOptionPane.showMessageDialog(null, "Player " + currentPlayer + " wins!");
+                    showMessage("Player " + currentPlayer + " wins!");
                     resetBoard();
                 } else if (isBoardFull()) {
-                    JOptionPane.showMessageDialog(null, "It's a draw!");
+                    showMessage("It's a draw!");
                     resetBoard();
                 } else {
                     switchPlayer();
@@ -160,19 +163,39 @@ public class Main extends JFrame {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 board[i][j] = '-';
-                buttons[i][j].setText("");
+                buttons[i][j].setLabel("");
                 buttons[i][j].setEnabled(true);
             }
         }
     }
 
+    // Display a message dialog
+    private void showMessage(String message) {
+        new Dialog(this, "Game Over", message);
+    }
+
     // Main method to start the application
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new Main();
+        new Main();
+    }
+}
+
+// Dialog class for displaying messages
+class Dialog extends java.awt.Dialog {
+    public Dialog(Frame parent, String title, String message) {
+        super(parent, title, true);
+        setLayout(new BorderLayout());
+        add(new java.awt.Label(message), BorderLayout.CENTER);
+
+        Button ok = new Button("OK");
+        ok.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
             }
         });
+        add(ok, BorderLayout.SOUTH);
+        setSize(300, 150);
+        setLocationRelativeTo(parent);
+        setVisible(true);
     }
 }
